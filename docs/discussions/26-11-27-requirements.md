@@ -22,7 +22,8 @@
 - 탐색, 업로드(FBQ 기본값인 10MB 조각 분할), 내려받기, 폴더 zip 내려받기, 파일 이름 검색을 한다(Q4, Q7, Q9).
 - 보기: 이미지, PDF, 텍스트와 코드, 마크다운. 편집: 텍스트와 마크다운. Office와 영상은 처음 범위가 아니다(Q2, Q9).
 - 새 폴더, 이름 바꾸기, 이동은 허용한다. 삭제는 끈다. 덮어쓰기는 FBQ의 기본 동작을 따른다(Q6, Q11, Q14).
-- `.env`로 시작하는 파일, `.git` 폴더, `.properties`로 끝나는 파일은 목록, 검색, 색인에서 숨긴다. 이름을 알면 받을 수 있을 가능성은 받아들인다(Q13).
+- `.env`로 시작하는 파일, `.git` 폴더와 파일, `.properties`로 끝나는 파일은 목록, 검색, 색인에서 숨긴다. 정확한 경로로 받거나 폴더를 zip으로 받으면 숨긴 파일도 받아지는 것은 받아들인다. `.env`와 `.properties`를 계속 숨길지는 써 보며 다시 정한다(Q13).
+- `files.spiaminto.com`에는 Cloudflare 캐시 우회 규칙을 건다(Q13).
 - 공유 링크는 없다(Q7).
 
 **저장소와 작업 순서**
@@ -41,6 +42,7 @@
 - [ ] Google Cloud 콘솔에서 Access 전용 OAuth 클라이언트를 만든다. 리디렉션 URI는 `https://<팀 이름>.cloudflareaccess.com/cdn-cgi/access/callback`이다.
 - [ ] Zero Trust에 Google 로그인을 등록한다.
 - [ ] Access 애플리케이션을 `files.spiaminto.com`에 만들고 허용 이메일 하나와 유지 기간 24시간을 넣는다.
+- [ ] `files.spiaminto.com` 전체에 캐시를 우회하는 Cache Rule을 건다.
 - [ ] 에이전트가 요청하면 브라우저에서 `cloudflared tunnel login`을 승인한다.
 - [ ] 시험용 폴더로 시험한 결과를 확인하고, 루트를 `C:\_workspace`로 바꿀지 정한다.
 
@@ -48,9 +50,11 @@
 
 설치하면서 확인한다. 요구사항과 어긋나면 사용자에게 묻는다.
 
-- FBQ에서 `127.0.0.1`에만 여는 설정, 삭제 권한을 끄는 설정, 프록시 인증 설정의 실제 이름. 조사 보고에 없어 에이전트의 지식으로 적었다.
-- FBQ의 조건 규칙이 접두사(`.env*`)와 확장자(`*.properties`) 패턴을 받는지. 확인한 것은 정확한 파일 이름(`fileNames`)과 폴더 이름 끝(`folderEndsWith`)까지다.
 - FBQ를 Windows 서비스로 돌리는 방법(자체 기능, WinSW, 안 되면 작업 스케줄러).
+- 브라우저 화면에서의 동작. 로컬 시험은 curl로 헤더를 넣어 했고, 브라우저는 Cloudflare 연결 뒤에 확인한다.
+- FBQ가 응답에 캐시 금지 헤더를 붙이는지. 캐시 우회 규칙을 걸면 결과는 같다.
+
+FBQ 설정 키 이름과 숨김 패턴(`fileStartsWith`, `fileEndsWith`)은 로컬 설치에서 확인했다. 결과는 `docs/operations.md`에 있다.
 - Tunnel 공개 호스트명에 100MB 한도가 걸린다는 Cloudflare의 직접 문장은 찾지 못했다. 두 문장을 이어 걸린다고 추정했다. 100MB를 넘는 파일이 Tunnel을 거쳐 올라가는지 시험한다.
 
 ## 용어
@@ -352,6 +356,12 @@ FBQ로 정해지면서 열린 질문이다. FBQ의 설정 이름과 동작 가�
 - 에이전트의 답: 그렇다. FBQ의 소스별 조건 규칙(`fileNames`, `folderEndsWith`, `ignoreHidden` 등)으로 목록, 검색, 색인에서 뺀다 [확인]. 설정 파일에 적는 것이라 화면에서 켜고 끄지 못한다.
 - 답: `.env`, `.git`, `.properties`를 숨긴다.
 - 정리: `.env`로 시작하는 파일(`.env.local` 등 포함), `.git` 폴더, `.properties`로 끝나는 파일을 목록, 검색, 색인에서 숨긴다. 이름을 알면 받을 수 있을 가능성은 받아들인다.
+- 로컬 설치 뒤에 더한 것: 숨긴 파일도 폴더 zip에는 들어간다는 것이 시험에서 드러났고, FBQ에는 zip에서 패턴으로 빼는 설정이 없다. 사용자는 받아들이는 것은 상관없다고 하면서, 숨긴 이유가 Access 인증보다 Cloudflare가 HTTPS를 풀어 내용을 평문으로 본다는 점이었다고 물었다. 같은 논리면 zip은 노출되지 않는가.
+- 에이전트의 답: 평문을 볼 수 있는 것은 Cloudflare뿐이다. 브라우저와 Cloudflare 사이, Cloudflare와 cloudflared 사이는 암호화되고, cloudflared와 FBQ 사이의 평문은 같은 PC 안에서만 오간다. 이것은 터널을 지나는 모든 파일에 해당한다. 숨기기는 열거나 받지 않은 파일이 터널을 지나지 않게 할 뿐이고, zip에 들어간 숨긴 파일은 터널을 지나므로 같은 논리면 Cloudflare에 노출된다. 길은 받아들이고 비밀값이 든 폴더를 zip으로 받지 않기, 경로 단위 차단 시험(zip에 걸리는지 확인하지 않았고 새 파일을 막지 못한다), 비밀값은 Tailscale로 받기였고, 추천은 첫째였다.
+- 사용자가 다시 한 말: 그렇다면 비밀값을 굳이 숨길 필요가 있나. Cloudflare가 파일 내용을 하나하나 로깅할까. zip 한 번 잘못 받으면 어차피 노출되는 것인데 고민된다.
+- 에이전트가 확인한 것: Cloudflare의 Data Transit Privacy 백서는 프록시를 지나는 요청과 응답을 메모리에서 처리하고, 디스크에 쓰는 것은 캐시한 정적 콘텐츠뿐이라고 적는다. 본문을 남기는 기능은 고객이 켜는 제품(WAF 페이로드 로깅, DLP, Gateway)에 있다. Cloudflare가 밝힌 정책이며 동작을 검증한 것은 아니다.
+- 에이전트의 의견: 로그보다 캐시를 챙길 일이다. `files.spiaminto.com` 전체에 캐시 우회 규칙을 건다. 숨김은 보안보다 편의의 문제다. `.git`은 목록을 어지럽히고 잘못 고치면 저장소가 망가지므로 숨긴다. `.env`와 `.properties`는 실수로 화면에 띄우는 일을 줄일 뿐이고, 밖에서 Spring 설정을 고치려면 방해가 되므로 열어 볼 일이 있는지로 정한다.
+- 답: 덧붙여 두고 일단 지금 설정(셋 다 숨김)으로 간다.
 
 #### Q14. 덮어쓰기
 
@@ -428,5 +438,5 @@ FBQ로 정해지면서 열린 질문이다. FBQ의 설정 이름과 동작 가�
 - copyparty: [README](https://github.com/9001/copyparty), [IdP docs](https://github.com/9001/copyparty/blob/hovudstraum/docs/idp.md)
 - filebrowser 유지보수 모드: [README mirror](https://gitlab.cern.ch/atlas-itk/sw/external/filebrowser/-/blob/master/README.md)
 - Tailscale: [Serve](https://tailscale.com/kb/1312/serve), [identity](https://tailscale.com/docs/concepts/tailscale-identity), [Funnel](https://tailscale.com/kb/1223/funnel), [connection types](https://tailscale.com/docs/reference/connection-types), [DERP servers](https://tailscale.com/docs/reference/derp-servers), [peer relays 블로그](https://tailscale.com/blog/peer-relays-international-networks), [포럼: bandwidth for free users](https://forum.tailscale.com/t/bandwidth-for-free-users/5242), [Stack Overflow: funnel bandwidth](https://kiwix.lema.org/stackoverflow.com_en_all_2023-11/questions/76091568/tailscale-funnel-bandwidth-limit)
-- Cloudflare: [Service-Specific Terms](https://www.cloudflare.com/service-specific-terms-application-services), [Delivering videos](https://developers.cloudflare.com/fundamentals/reference/policies-compliances/delivering-videos-with-cloudflare/index.md), [section 2.8 블로그](https://blog.cloudflare.com/updated-tos/), [Validate JWTs](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/), [Authorization cookie](https://developers.cloudflare.com/cloudflare-one/identity/authorization-cookie), [Workers limits](https://developers.cloudflare.com/workers/platform/limits/), [413 오류](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/4xx-client-error/error-413/), [Tunnel FAQ](https://developers.cloudflare.com/cloudflare-one/faq/cloudflare-tunnels-faq/), [Google IdP](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/google/), [CNAME(부분) 설정](https://developers.cloudflare.com/dns/zone-setups/partial-setup/), [서브도메인 설정](https://developers.cloudflare.com/dns/zone-setups/subdomain-setup/setup/)
+- Cloudflare: [Service-Specific Terms](https://www.cloudflare.com/service-specific-terms-application-services), [Delivering videos](https://developers.cloudflare.com/fundamentals/reference/policies-compliances/delivering-videos-with-cloudflare/index.md), [section 2.8 블로그](https://blog.cloudflare.com/updated-tos/), [Validate JWTs](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/), [Authorization cookie](https://developers.cloudflare.com/cloudflare-one/identity/authorization-cookie), [Workers limits](https://developers.cloudflare.com/workers/platform/limits/), [413 오류](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/4xx-client-error/error-413/), [Tunnel FAQ](https://developers.cloudflare.com/cloudflare-one/faq/cloudflare-tunnels-faq/), [Google IdP](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/google/), [CNAME(부분) 설정](https://developers.cloudflare.com/dns/zone-setups/partial-setup/), [서브도메인 설정](https://developers.cloudflare.com/dns/zone-setups/subdomain-setup/setup/), [Data Transit Privacy 백서](https://cf-assets.www.cloudflare.com/slt3lc6tev37/1S0GCmfDE4rA1CK5dCK9kL/1410444a21bedc1aefaa9e332b4a1e34/Data_Transit_Privacy_Whitepaper_V2.pdf), [WAF 페이로드 암호화](https://blog.cloudflare.com/encrypt-waf-payloads-hpke/), [DLP 로깅 옵션](https://developers.cloudflare.com/cloudflare-one/data-loss-prevention/dlp-policies/logging-options/)
 - Cloudflare 사용 사례: [Access로 셀프호스트 앱 보호](https://dev.to/imrhlrvndrn/secure-any-self-hosted-app-with-cloudflare-access-ck0), [Tunnel 설정 가이드](https://fullmetalbrackets.com/blog/setup-cloudflare-tunnel-to-access-self-hosted-apps), [Zero Trust 홈서버](https://akitaonrails.com/en/2025/09/10/protecting-your-home-server-with-cloudflare-zero-trust/), [Nextcloud 포럼: Tunnel 100MB·524](https://help.nextcloud.com/t/large-uploads-via-public-share-link-fail-at-the-end-behind-cloudflare-assembly-move-aborted-then-web-uploader-deletes-the-chunks/250855), [Localtonet: 100MB 413](https://localtonet.com/blog/cloudflare-tunnel-alternative), [Guacamole: 청크 업로드 실패 사례](https://issues.apache.org/jira/browse/GUACAMOLE-1320)
