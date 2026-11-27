@@ -32,6 +32,7 @@ GitHub PR #1(https://github.com/spiaminto/remote-file-manager/pull/1)의 본문�
 - `docs/open-access-paths.md`: 이 PC로 들어오는 열린 접속 경로 목록(Tailscale serve 둘, 계획 중인 Cloudflare Tunnel).
 - `docs/works/26-11-27-file-manager/discussion.md`: Q13에 zip과 Cloudflare 평문 논의를 덧붙이고, 캐시 우회 규칙을 요구사항과 사용자가 할 일에 더했다.
 - 작업 문서를 `docs/discussions/`에서 `docs/works/26-11-27-file-manager/`로 옮겼다(사용자의 지시). 디스커션은 `discussion.md`, 접속 경계 도식은 `file-manager.html`, 이 PR 본문은 `pr.md`다.
+- `CLAUDE.md`: 계획 문서와 인터뷰 기록의 경로를 `docs/works/` 아래로 바꾸고, `pr.md` 작성 규칙을 더하고, PR 본문의 절 이름을 "요구사항 해석"으로 바꿨다.
 
 ## 증명
 
