@@ -17,8 +17,8 @@ out/
 .chrome-devtools-mcp/
 .playwright-mcp/
 
-### PR 본문 파일 (CLAUDE.md "pstack 운용") ###
-.pr/
-
 ### 개인 설정 ###
 .claude/settings.local.json
+
+### 세션 작업 상태 (전역 CLAUDE.md "컨텍스트 압축 뒤 복원") ###
+.claude/STATE.md
