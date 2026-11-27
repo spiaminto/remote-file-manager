@@ -9,20 +9,20 @@ GitHub PR #1(https://github.com/spiaminto/remote-file-manager/pull/1)의 본문�
 
 요구사항은 `docs/works/26-11-27-file-manager/discussion.md`의 "요구사항" 절이다.
 
-- **루트:** 앱이 보여 주는 최상위 폴더로 읽었다. 요구사항은 `C:\_workspace`이지만 CLAUDE.md "경계"와 Q20 뒤의 합의대로 이 PR에서는 시험용 폴더(`C:\_Utility\filebrowser-quantum\sandbox`)를 루트로 둔다.
+- **루트:** 앱이 보여 주는 최상위 폴더로 읽었다. 요구사항은 `C:\_workspace`이지만 CLAUDE.md "경계"와 Q20 이후의 합의대로 이 PR에서는 시험용 폴더(`C:\_Utility\filebrowser-quantum\sandbox`)를 루트로 둔다.
 - **삭제는 끈다:** 파일과 폴더 삭제를 API에서 거부하는 것으로 읽었다. 이름 바꾸기, 이동, 덮어쓰기, 편집 저장은 삭제가 아니므로 허용한다(FBQ에서는 `modify` 권한).
 - **숨긴다:** 목록, 검색, 색인에서 빠지는 것으로 읽었다(Q13). 정확한 경로로 받거나 폴더 zip에 들어가는 것은 사용자가 받아들였다.
 - **앱 로그인 한 번:** Access를 통과한 요청의 `Cf-Access-Authenticated-User-Email` 헤더로 FBQ가 사용자를 정하고, FBQ 자체 로그인은 두지 않는 것으로 읽었다(Q12).
 
 ## 묻지 않고 정한 것
 
-- 포트는 8090이다. 8188, 5001(Tailscale serve), 8095(다른 프로그램)는 쓰이고 있다.
+- 포트는 8090이다. 8188, 5001(Tailscale serve), 8095(다른 프로그램)는 이미 사용 중이다.
 - WebDAV를 껐다. 요구사항에 없는 접근 경로다.
 - `.git` 폴더뿐 아니라 `.git` 파일(워크트리, 서브모듈)도 숨겼다.
-- 관리자 계정을 두지 않았다. 비밀번호 로그인을 끄면 FBQ가 admin을 만들지 않고, 설정은 `deploy/fbq/config.yaml`을 고쳐 바꾼다.
+- 관리자 계정을 두지 않았다. 비밀번호 로그인을 끄면 FBQ가 admin을 만들지 않고, 설정을 바꿀 때는 `deploy/fbq/config.yaml`을 수정한다.
 - 설치 폴더의 `config.yaml`은 저장소의 원본을 `install.ps1`이 복사해 만든다.
-- 이 단위(설치, 설정, 시험)는 서브에이전트가 했고, 메인 세션은 설정 파일과 문서를 요구사항과 대조했다. 요구사항 문서의 Q13 덧붙임과 캐시 우회 항목은 메인 세션이 직접 썼다.
-- 이 세션에는 pstack 플러그인이 올라오지 않아 pstack 스킬을 쓰지 못했다. CLAUDE.md "pstack 운용"의 원칙(단위 위임, 이 두 절)만 따랐다.
+- 이 단위(설치, 설정, 시험)는 서브에이전트가 했고, 메인 세션은 설정 파일과 문서를 요구사항과 대조했다. 요구사항 문서의 Q13 덧붙임과 캐시 우회 항목은 메인 세션이 직접 작성했다.
+- 이 세션에는 pstack 플러그인이 올라오지 않아 pstack 스킬을 사용하지 못했다. CLAUDE.md "pstack 운용"의 원칙(단위 위임, PR 본문 앞쪽의 두 절)만 따랐다.
 
 ## 바뀐 것
 
