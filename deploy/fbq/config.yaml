@@ -1,0 +1,57 @@
+# FileBrowser Quantum v2.1.0-stable 설정의 원본이다.
+# 설치 폴더의 config.yaml은 install.ps1이 이 파일을 복사해 만든다. 설치 폴더에서 직접 고치지 않는다.
+# 키 이름은 v2.1.0-stable 태그의 backend/pkg/settings/structs.go, auth.go와
+# https://filebrowserquantum.com/en/docs/ 의 설정 문서로 확인했다. 알 수 없는 키가 있으면 FBQ가 시작하지 않는다.
+# 비밀값은 이 파일에 적지 않는다. 세션 서명 키(auth.key)는 비워 두면 FBQ가 만들어 DB에 저장한다.
+
+http:
+  # cloudflared가 같은 PC에서 돌므로 루프백에서만 받는다. 프록시 인증이 헤더를 그대로 믿기 때문에 이 줄이 보안의 전제다.
+  listen: "127.0.0.1"
+  port: 8090
+  # 요구사항에 없는 접근 경로라 끈다.
+  disableWebDAV: true
+
+server:
+  database:
+    path: 'C:\_Utility\filebrowser-quantum\data\filebrowser.sqlite'
+  cacheDir: 'C:\_Utility\filebrowser-quantum\cache'
+  sources:
+    # 시험하는 동안은 시험용 폴더를 루트로 둔다. C:\_workspace로 바꾸는 것은 사용자가 정한다.
+    - path: 'C:\_Utility\filebrowser-quantum\sandbox'
+      name: sandbox
+      config:
+        defaultEnabled: true
+        # 이 소스에서 공유 링크를 만들지 못하게 한다.
+        private: true
+        # 프록시 인증으로 처음 만들어지는 사용자에게 주는 권한이다. 이미 만들어진 사용자의 권한은 바뀌지 않는다.
+        # rename과 move는 modify, 새 폴더와 업로드는 create, 덮어쓰기와 편집 저장은 modify가 필요하다.
+        defaultPermissions:
+          view: true
+          download: true
+          modify: true
+          create: true
+          delete: false
+        # 목록, 검색, 색인에서 뺀다. 이름 비교는 대소문자를 구분한다.
+        rules:
+          - fileStartsWith: ".env"
+          - folderName: ".git"
+          # 워크트리와 서브모듈의 .git은 폴더가 아니라 파일이다.
+          - fileName: ".git"
+          - fileEndsWith: ".properties"
+
+auth:
+  methods:
+    # 비밀번호 로그인을 끄면 FBQ는 admin 계정도 만들지 않는다.
+    password:
+      enabled: false
+    proxy:
+      enabled: true
+      header: "Cf-Access-Authenticated-User-Email"
+
+userDefaults:
+  account:
+    permissions:
+      admin: false
+      api: false
+      share: false
+      realtime: false

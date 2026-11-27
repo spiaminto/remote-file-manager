@@ -70,7 +70,7 @@ Angular 커밋 컨벤션(angular/angular `contributing-docs/commit-message-guide
 > 작성일: 26-11-27\
 > 최종 수정일: 26-11-28
 
-상시 켜 둔 집 PC(Windows 11)를 홈서버로 삼아, 밖에서 브라우저로 로그인해 정해 둔 경로(`C:\_workspace` 이하를 상정)를 탐색하고 파일을 올리고 내려받는 개인용 웹앱이다. 사용자 한 명만 쓴다. 외부 접속은 Cloudflare Tunnel과 Access(Google 로그인)로 한다. 앱은 직접 구현하지 않고 FileBrowser Quantum을 설치해 설정으로 맞추며, 써 보고 불편하면 직접 구현을 다시 검토한다. 사전 기획, 리서치, 요구사항 인터뷰는 `docs/discussions/26-11-27-requirements.md`에 있다.
+상시 켜 둔 집 PC(Windows 11)를 홈서버로 삼아, 밖에서 브라우저로 로그인해 정해 둔 경로(`C:\_workspace` 이하를 상정)를 탐색하고 파일을 올리고 내려받는 개인용 웹앱이다. 사용자 한 명만 쓴다. 외부 접속은 Cloudflare Tunnel과 Access(Google 로그인)로 한다. 앱은 직접 구현하지 않고 FileBrowser Quantum을 설치해 설정으로 맞추며, 써 보고 불편하면 직접 구현을 다시 검토한다. 사전 기획, 리서치, 요구사항 인터뷰는 `docs/works/26-11-27-file-manager/discussion.md`에 있다.
 
 ## 경계
 
@@ -80,7 +80,7 @@ Angular 커밋 컨벤션(angular/angular `contributing-docs/commit-message-guide
 
 ## 맥락 복원
 
-- 계획 문서: `docs/discussions/` 아래 가장 최근의 인터뷰 문서. 지금은 `26-11-27-requirements.md`이고, 그 문서의 "요구사항" 절이 요구사항이다.
+- 계획 문서: `docs/works/` 아래 가장 최근 작업 폴더의 `discussion.md`. 지금은 `docs/works/26-11-27-file-manager/discussion.md`이고, 그 문서의 "요구사항" 절이 요구사항이다.
 - 코드 규칙: `docs/CONVENTIONS.md`
 - 작업 상태: `.claude/STATE.md`
 - 단계 경계: 커밋 직후.
@@ -96,8 +96,9 @@ Angular 커밋 컨벤션(angular/angular `contributing-docs/commit-message-guide
 - 모델 규칙은 `~/.claude/rules/pstack-models.md`가 아니라 이 프로젝트의 `.claude/rules/pstack-models.md`에 있다. 다른 프로젝트의 세션에 섞이지 않게 프로젝트에 두었다. 역할 줄이 컨텍스트에 없으면 이 파일을 읽는다. 홈에 같은 파일을 만들지 않는다.
 - 실제 앱으로 동작을 증명하는 전용 스킬은 아직 없다. 앱의 구성이 정해진 뒤에 만든다. 그 전에는 증명하는 단계에서 무엇을 어떻게 확인했는지 PR 본문에 적는다.
 - Opening a PR: 원격은 GitHub의 `spiaminto/remote-file-manager`(공개)이고 기본 브랜치는 `main`이다. 브랜치를 푸시하고 `gh pr create`로 PR을 연다. 본문은 Opening a PR의 형식을 따른다. Babysit과 Shipping 플레이북의 PR 감시는 쓰되, 병합은 사용자가 한다. 저장소가 공개이므로 PR 본문과 커밋에 비밀값, 개인 정보, 집 PC의 접속 정보를 적지 않는다.
-- PR 본문의 앞쪽에 두 절을 넣는다. "요구사항을 읽은 방식"에는 요구사항의 도메인 낱말을 어떤 뜻으로 읽었는지와 그 근거(코드의 주석, 기존 동작)를 적는다. "묻지 않고 정한 것"에는 요구사항이 정하지 않아 스스로 정한 것을 모두 적는다. 브랜치나 PR을 나눈 것도 여기에 적는다.
+- PR 본문은 그 작업 폴더의 `pr.md`에도 같은 내용으로 작성한다. 맨 위에 PR 제목, 작성일·최종 수정일, PR 링크 한 줄을 두고 그 아래는 GitHub 본문과 같게 한다. GitHub 본문을 고치면 `pr.md`도 함께 고친다.
+- PR 본문의 앞쪽에 두 절을 넣는다. "요구사항 해석"에는 요구사항의 도메인 낱말을 어떤 뜻으로 해석했는지와 그 근거(코드의 주석, 기존 동작)를 적는다. "묻지 않고 정한 것"에는 요구사항이 정하지 않아 스스로 정한 것을 모두 적는다. 브랜치나 PR을 나눈 것도 여기에 적는다.
 - 커밋 메시지와 PR 제목은 이 문서의 "커밋" 절을 따른다. pstack 예시의 `chore`는 쓰지 않는다.
 - 설치되지 않은 것: `cursor-team-kit` 플러그인의 `/deslop`, `control-ui`, `control-cli`, Cursor 내장 `create-skill`. 이것들을 부르는 단계는 무엇을 왜 건너뛰는지 한 줄로 적고 넘어간다.
 - 주석 점검을 돌리지 않는다. `poteto-mode`의 "Before review → no-comments"와 플레이북 `opening-a-pr.md`의 `/no-comments`를 비롯해 `no-comments`를 부르는 모든 단계를 건너뛰고, `comment-sicko` 에이전트를 띄우지 않는다. 이 에이전트는 `.claude/settings.json`의 deny 규칙으로도 막혀 있으며, 다른 에이전트로 대신하지 않는다. 주석은 `poteto-mode`의 Comments 절이 아니라 `docs/CONVENTIONS.md`의 "주석"을 따른다. 건너뛴 것은 PR 본문에 한 줄로 적는다.
-- 요구사항 인터뷰는 `/grill-me`로 한다. pstack에는 요구사항을 인터뷰하는 스킬이 없어서 `.claude/skills/`에 `grill-me`와 `grilling`을 따로 넣었다. 인터뷰하는 세션은 라운드마다 질문, 추천, 사용자의 답을 `docs/discussions/<yy-MM-dd>-<주제>.md`에 기록하고, 요구사항에 나오는 도메인 낱말의 뜻을 그 문서에 적는다. 구현 세션은 그 문서를 요구사항으로 읽는다.
+- 요구사항 인터뷰는 `/grill-me`로 한다. pstack에는 요구사항을 인터뷰하는 스킬이 없어서 `.claude/skills/`에 `grill-me`와 `grilling`을 따로 넣었다. 인터뷰하는 세션은 라운드마다 질문, 추천, 사용자의 답을 `docs/works/<yy-MM-dd>-<slug>/discussion.md`에 기록하고, 요구사항에 나오는 도메인 낱말의 뜻을 그 문서에 적는다. 구현 세션은 그 문서를 요구사항으로 읽는다.
