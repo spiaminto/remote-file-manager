@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>파일매니저 접속 경계</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* 레이아웃: 한 열 문서. 위에서 아래로 A안 도식 → 번호 설명 → B안 도식 → 책임 표 → 확인하지 않은 것 */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --ink: #1c2330;
+  --muted: #5a6474;
+  --line: #c6ccd6;
+  --net: #eceef2;
+  --cf: #fbf0e4;
+  --home: #e7f2ec;
+  --pc: #f6faf7;
+  --key: #2c66d0;
+  --bad: #c0402c;
+  --own: #f3eefa;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151b; --surface: #1a2029; --ink: #e5e9ef; --muted: #9aa3b1; --line: #3a4351;
+    --net: #171c23; --cf: #2a2118; --home: #14231c; --pc: #18211c; --key: #77a4ff; --bad: #ff7b65; --own: #221c2c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151b; --surface: #1a2029; --ink: #e5e9ef; --muted: #9aa3b1; --line: #3a4351;
+  --net: #171c23; --cf: #2a2118; --home: #14231c; --pc: #18211c; --key: #77a4ff; --bad: #ff7b65; --own: #221c2c;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.65;
+}
+.wrap {
+  max-width: 1160px; margin: 0 auto;
+  padding-block: 32px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px;
+}
+h1 { font-size: 1.6rem; margin: 0; text-wrap: balance; }
+h2 { font-size: 1.15rem; margin: 0 0 8px; text-wrap: balance; }
+p { margin: 0; max-width: 68ch; }
+.lead { color: var(--muted); }
+code { font-family: var(--font-mono); font-size: .9em; }
+section { display: grid; gap: 12px; min-width: 0; }
+.fig { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+.fig svg { display: block; width: 100%; min-width: 880px; height: auto; }
+ol.steps { margin: 0; padding-left: 1.6em; display: grid; gap: 4px; max-width: 80ch; }
+.tag { display: inline-block; font-size: .78rem; letter-spacing: .04em; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; }
+.tag.a { color: var(--key); }
+.tag.b { color: var(--bad); }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; background: var(--surface); }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font-size: .85rem; color: var(--muted); font-weight: 600; letter-spacing: .02em; }
+td.gap { color: var(--bad); }
+ul.notes { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; max-width: 80ch; color: var(--muted); }
+
+/* SVG */
+.z-net { fill: var(--net); stroke: var(--line); }
+.z-cf { fill: var(--cf); stroke: var(--line); }
+.z-own { fill: var(--own); stroke: var(--line); }
+.z-home { fill: var(--home); stroke: var(--line); stroke-dasharray: 7 5; }
+.z-pc { fill: var(--pc); stroke: var(--line); }
+.zl { fill: var(--muted); font-size: 13px; font-weight: 600; letter-spacing: .03em; }
+.bx { fill: var(--surface); stroke: var(--line); }
+.bx-key { fill: var(--surface); stroke: var(--key); stroke-width: 2; }
+.bx-bad { fill: var(--surface); stroke: var(--bad); stroke-width: 1.5; }
+.t { fill: var(--ink); font-size: 13.5px; font-weight: 600; }
+.s { fill: var(--muted); font-size: 12px; }
+.m { fill: var(--muted); font-size: 11.5px; font-family: var(--font-mono); }
+.flow { stroke: var(--ink); stroke-width: 1.6; fill: none; }
+.dot { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasharray: 2 3; }
+.blk { stroke: var(--bad); stroke-width: 1.6; fill: none; stroke-dasharray: 6 4; }
+.risk { stroke: var(--bad); stroke-width: 1.8; fill: none; }
+.pipe { stroke: var(--key); stroke-opacity: .22; stroke-width: 14; fill: none; stroke-linecap: round; }
+.ah { fill: var(--ink); }
+.ah-bad { fill: var(--bad); }
+.bd { fill: var(--key); }
+.bdt { fill: var(--surface); font-size: 11px; font-weight: 600; }
+.x { stroke: var(--bad); stroke-width: 2.4; }
+.bl { fill: var(--bad); font-size: 12px; }
+.kl { fill: var(--key); font-size: 12px; }
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:8px">
+    <h1>파일매니저 접속 경계</h1>
+    <p class="lead">밖의 브라우저에서 <code>C:\_workspace</code>의 파일까지 요청이 어떤 경계를 지나는지, 각 경계를 누가 지키는지 그린 도식이다. 위는 지금 추천하는 A안(Cloudflare Tunnel + Access), 아래는 비교용 B안(공유기 포트포워딩)이다.</p>
+  </header>
+
+  <section>
+    <h2><span class="tag a">A안</span> Cloudflare Tunnel + Access</h2>
+    <div class="fig">
+      <svg viewBox="0 0 1120 580" role="img" aria-label="A안 접속 경계 도식">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+          <marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-bad" d="M0,0 L10,5 L0,10 z"/></marker>
+        </defs>
+
+        <!-- 영역 -->
+        <rect class="z-net" x="10" y="40" width="220" height="525" rx="8"/>
+        <text class="zl" x="24" y="64">인터넷</text>
+        <rect class="z-cf" x="250" y="40" width="260" height="525" rx="8"/>
+        <text class="zl" x="264" y="64">Cloudflare</text>
+        <rect class="z-home" x="530" y="40" width="580" height="525" rx="8"/>
+        <text class="zl" x="544" y="64">집 공유기 안 · 들어오는 포트 0개</text>
+        <rect class="z-pc" x="685" y="80" width="410" height="470" rx="8"/>
+        <text class="zl" x="699" y="102">홈서버 PC · Windows 11</text>
+
+        <!-- 인터넷 -->
+        <rect class="bx" x="30" y="90" width="180" height="56" rx="6"/>
+        <text class="t" x="120" y="114" text-anchor="middle">밖의 브라우저</text>
+        <text class="s" x="120" y="133" text-anchor="middle">사용자 본인</text>
+
+        <rect class="bx" x="30" y="200" width="180" height="56" rx="6"/>
+        <text class="t" x="120" y="224" text-anchor="middle">Google 로그인</text>
+        <text class="s" x="120" y="243" text-anchor="middle">계정 선택 · 인증</text>
+
+        <rect class="bx-bad" x="30" y="400" width="180" height="56" rx="6"/>
+        <text class="t" x="120" y="424" text-anchor="middle">모르는 사람 · 스캐너</text>
+        <text class="s" x="120" y="443" text-anchor="middle">허용되지 않은 요청</text>
+
+        <!-- Cloudflare -->
+        <rect class="bx" x="270" y="90" width="220" height="56" rx="6"/>
+        <text class="t" x="380" y="114" text-anchor="middle">DNS · HTTPS</text>
+        <text class="m" x="380" y="133" text-anchor="middle">files.spiaminto.com</text>
+
+        <rect class="bx-key" x="270" y="180" width="220" height="110" rx="6"/>
+        <text class="t" x="380" y="204" text-anchor="middle">Access</text>
+        <text class="s" x="380" y="226" text-anchor="middle">로그인 쿠키가 없으면 Google로</text>
+        <text class="s" x="380" y="245" text-anchor="middle">허용 이메일 1개와 대조</text>
+        <text class="s" x="380" y="264" text-anchor="middle">통과하면 이메일 헤더를 붙임</text>
+
+        <rect class="bx" x="270" y="320" width="220" height="70" rx="6"/>
+        <text class="t" x="380" y="346" text-anchor="middle">터널 끝점</text>
+        <text class="s" x="380" y="367" text-anchor="middle">요청 하나 100MB까지</text>
+
+        <!-- 집 안 -->
+        <rect class="bx" x="545" y="235" width="125" height="60" rx="6"/>
+        <text class="t" x="607" y="260" text-anchor="middle">같은 공유기의</text>
+        <text class="t" x="607" y="279" text-anchor="middle">다른 기기</text>
+
+        <!-- PC 안 -->
+        <rect class="bx" x="705" y="120" width="155" height="76" rx="6"/>
+        <text class="t" x="782" y="143" text-anchor="middle">FBQ 데이터</text>
+        <text class="m" x="782" y="163" text-anchor="middle">C:\_Utility\</text>
+        <text class="m" x="782" y="181" text-anchor="middle">filebrowser-quantum</text>
+
+        <rect class="bx-key" x="880" y="120" width="205" height="190" rx="6"/>
+        <text class="t" x="982" y="146" text-anchor="middle">FileBrowser Quantum</text>
+        <text class="m" x="982" y="172" text-anchor="middle">127.0.0.1:&lt;포트&gt;만 받음</text>
+        <text class="s" x="982" y="196" text-anchor="middle">이메일 헤더로 사용자 확인</text>
+        <text class="s" x="982" y="219" text-anchor="middle">보기 · 텍스트·MD 편집</text>
+        <text class="s" x="982" y="242" text-anchor="middle">업로드(10MB 조각) · zip · 검색</text>
+        <text class="s" x="982" y="265" text-anchor="middle">삭제 끔 · .env/.git 숨김</text>
+        <text class="s" x="982" y="288" text-anchor="middle">루트 밖 경로 거부</text>
+
+        <rect class="bx" x="705" y="330" width="155" height="70" rx="6"/>
+        <text class="t" x="782" y="356" text-anchor="middle">cloudflared</text>
+        <text class="s" x="782" y="377" text-anchor="middle">Windows 서비스</text>
+
+        <rect class="bx" x="880" y="440" width="205" height="66" rx="6"/>
+        <text class="t" x="982" y="465" text-anchor="middle">루트</text>
+        <text class="m" x="982" y="487" text-anchor="middle">C:\_workspace</text>
+
+        <!-- 정상 흐름 -->
+        <path class="flow" d="M210,118 L268,118" marker-end="url(#ah)"/>
+        <path class="flow" d="M380,146 L380,178" marker-end="url(#ah)"/>
+        <path class="flow" d="M270,228 L212,228" marker-start="url(#ah)" marker-end="url(#ah)" stroke-dasharray="5 4"/>
+        <path class="flow" d="M380,290 L380,318" marker-end="url(#ah)"/>
+        <path class="pipe" d="M490,358 L705,365"/>
+        <path class="flow" d="M490,358 L703,365" marker-end="url(#ah)"/>
+        <text class="kl" x="597" y="340" text-anchor="middle">cloudflared가 바깥으로 먼저 연결</text>
+        <text class="kl" x="597" y="392" text-anchor="middle">요청은 그 연결을 타고 들어옴</text>
+        <path class="flow" d="M860,365 L930,365 L930,312" marker-end="url(#ah)"/>
+        <path class="flow" d="M985,310 L985,438" marker-end="url(#ah)"/>
+        <path class="dot" d="M860,158 L880,158"/>
+
+        <!-- 번호 -->
+        <g><circle class="bd" cx="240" cy="104" r="9"/><text class="bdt" x="240" y="108" text-anchor="middle">1</text></g>
+        <g><circle class="bd" cx="398" cy="163" r="9"/><text class="bdt" x="398" y="167" text-anchor="middle">2</text></g>
+        <g><circle class="bd" cx="240" cy="214" r="9"/><text class="bdt" x="240" y="218" text-anchor="middle">3</text></g>
+        <g><circle class="bd" cx="398" cy="305" r="9"/><text class="bdt" x="398" y="309" text-anchor="middle">4</text></g>
+        <g><circle class="bd" cx="660" cy="362" r="9"/><text class="bdt" x="660" y="366" text-anchor="middle">5</text></g>
+        <g><circle class="bd" cx="895" cy="350" r="9"/><text class="bdt" x="895" y="354" text-anchor="middle">6</text></g>
+        <g><circle class="bd" cx="1003" cy="375" r="9"/><text class="bdt" x="1003" y="379" text-anchor="middle">7</text></g>
+
+        <!-- 막힌 흐름 -->
+        <path class="blk" d="M210,412 L262,292"/>
+        <line class="x" x1="257" y1="285" x2="269" y2="297"/><line class="x" x1="269" y1="285" x2="257" y2="297"/>
+        <text class="bl" x="120" y="385" text-anchor="middle">Access: 허용 이메일 아님</text>
+
+        <path class="blk" d="M210,444 L236,444 L236,530 L524,530"/>
+        <line class="x" x1="518" y1="524" x2="530" y2="536"/><line class="x" x1="530" y1="524" x2="518" y2="536"/>
+        <text class="bl" x="380" y="520" text-anchor="middle">집 IP로 직접 → 열린 포트 없음</text>
+
+        <path class="blk" d="M670,265 L872,265"/>
+        <line class="x" x1="866" y1="259" x2="878" y2="271"/><line class="x" x1="878" y1="259" x2="866" y2="271"/>
+        <text class="bl" x="775" y="255" text-anchor="middle">127.0.0.1이라 닿지 않음</text>
+      </svg>
+    </div>
+    <ol class="steps">
+      <li>밖의 브라우저가 <code>files.spiaminto.com</code>에 HTTPS로 접속한다. 주소와 인증서는 Cloudflare가 맡는다.</li>
+      <li>요청은 Cloudflare에서 멈추고 Access가 받는다. 홈서버는 아직 아무것도 받지 않았다.</li>
+      <li>로그인 쿠키가 없으면 Google 로그인으로 보낸다. 로그인한 이메일이 허용 목록의 하나와 다르면 여기서 끝난다.</li>
+      <li>통과한 요청에 <code>Cf-Access-Authenticated-User-Email</code> 헤더가 붙어 터널로 간다. 요청 하나가 100MB를 넘으면 여기서 413으로 막힌다.</li>
+      <li>터널은 홈서버의 cloudflared가 Cloudflare 쪽으로 먼저 맺어 둔 연결이다. 요청은 이 연결을 거꾸로 타고 들어오므로 공유기에 열린 포트가 없어도 된다.</li>
+      <li>cloudflared가 같은 PC의 FBQ(<code>127.0.0.1</code>)로 넘긴다.</li>
+      <li>FBQ가 헤더의 이메일로 사용자를 확인하고, 루트 안에서만 읽고 쓴다.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2><span class="tag b">B안</span> 공유기 포트포워딩 (비교용)</h2>
+    <div class="fig">
+      <svg viewBox="0 0 1120 340" role="img" aria-label="B안 접속 경계 도식">
+        <defs>
+          <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+          <marker id="ahb2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah-bad" d="M0,0 L10,5 L0,10 z"/></marker>
+        </defs>
+        <rect class="z-net" x="10" y="40" width="220" height="285" rx="8"/>
+        <text class="zl" x="24" y="64">인터넷</text>
+        <rect class="z-own" x="250" y="40" width="260" height="285" rx="8"/>
+        <text class="zl" x="264" y="64">사용자가 직접 챙길 것</text>
+        <rect class="z-home" x="530" y="40" width="580" height="285" rx="8"/>
+        <text class="zl" x="544" y="64">집 공유기 안 · 443 포트를 FBQ로 보냄</text>
+        <rect class="z-pc" x="685" y="80" width="410" height="235" rx="8"/>
+        <text class="zl" x="699" y="102">홈서버 PC · Windows 11</text>
+
+        <rect class="bx" x="30" y="85" width="180" height="56" rx="6"/>
+        <text class="t" x="120" y="109" text-anchor="middle">밖의 브라우저</text>
+        <text class="s" x="120" y="128" text-anchor="middle">사용자 본인</text>
+
+        <rect class="bx-bad" x="30" y="250" width="180" height="56" rx="6"/>
+        <text class="t" x="120" y="274" text-anchor="middle">모르는 사람 · 스캐너</text>
+        <text class="s" x="120" y="293" text-anchor="middle">허용되지 않은 요청</text>
+
+        <rect class="bx" x="270" y="140" width="220" height="48" rx="6"/>
+        <text class="t" x="380" y="160" text-anchor="middle">주소</text>
+        <text class="s" x="380" y="178" text-anchor="middle">바뀌는 집 IP를 DDNS로 갱신</text>
+        <rect class="bx" x="270" y="198" width="220" height="48" rx="6"/>
+        <text class="t" x="380" y="218" text-anchor="middle">HTTPS</text>
+        <text class="s" x="380" y="236" text-anchor="middle">인증서 발급 · 갱신</text>
+
+        <rect class="bx" x="705" y="140" width="155" height="66" rx="6"/>
+        <text class="t" x="782" y="165" text-anchor="middle">루트</text>
+        <text class="m" x="782" y="187" text-anchor="middle">C:\_workspace</text>
+
+        <rect class="bx-bad" x="880" y="100" width="205" height="200" rx="6"/>
+        <text class="t" x="982" y="126" text-anchor="middle">FileBrowser Quantum</text>
+        <text class="m" x="982" y="152" text-anchor="middle">0.0.0.0:443 으로 받음</text>
+        <text class="s" x="982" y="178" text-anchor="middle">로그인 직접 (Google OIDC)</text>
+        <text class="s" x="982" y="201" text-anchor="middle">인증서를 직접 들고 있음</text>
+        <text class="s" x="982" y="224" text-anchor="middle">로그인 전 요청도 직접 받음</text>
+        <text class="s" x="982" y="247" text-anchor="middle">걸러 줄 앞단이 없음</text>
+
+        <path class="flow" d="M210,112 L878,112" marker-end="url(#ah2)"/>
+        <text class="s" x="610" y="104" text-anchor="middle">공인 IP의 443 → 공유기 → FBQ</text>
+        <path class="risk" d="M210,278 L878,278" marker-end="url(#ahb2)"/>
+        <text class="bl" x="610" y="270" text-anchor="middle">모르는 요청도 FBQ의 로그인 화면까지 닿음</text>
+        <path class="dot" d="M860,173 L880,173"/>
+      </svg>
+    </div>
+    <p>통신사가 공인 IP를 주지 않는 회선이면 B안은 할 수 없다. 사용자의 회선은 확인하지 않았다.</p>
+  </section>
+
+  <section>
+    <h2>경계마다 누가 지키는가</h2>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr><th>지킬 것</th><th>A안 (Tunnel + Access)</th><th>B안 (포트포워딩)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>주소</td><td>Cloudflare DNS</td><td class="gap">사용자 (DDNS 갱신)</td></tr>
+          <tr><td>HTTPS 인증서</td><td>Cloudflare</td><td class="gap">사용자 (발급 · 갱신)</td></tr>
+          <tr><td>로그인과 허용 계정</td><td>Access (Google). FBQ는 헤더를 믿기만 한다</td><td>FBQ (Google OIDC)</td></tr>
+          <tr><td>모르는 요청 걸러 내기</td><td>Access. FBQ에 닿기 전에 막는다</td><td class="gap">없음. FBQ가 모두 받는다</td></tr>
+          <tr><td>집 IP 노출</td><td>드러나지 않는다</td><td class="gap">드러난다</td></tr>
+          <tr><td>요청 하나의 크기</td><td>Cloudflare 100MB 한도. FBQ가 10MB 조각으로 나눠 통과한다</td><td>한도 없음</td></tr>
+          <tr><td>파일 권한 (삭제 끔, 숨김)</td><td>FBQ</td><td>FBQ</td></tr>
+          <tr><td>루트 밖 접근 차단</td><td>FBQ</td><td>FBQ</td></tr>
+          <tr><td>보기 · 편집 · 업로드 · zip · 검색</td><td>FBQ</td><td>FBQ</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>FBQ의 책임은 두 안에서 같다. 파일을 어떻게 보여 주고 무엇을 허용하는지다. 달라지는 것은 FBQ 앞에 무엇이 서느냐다. A안은 Cloudflare가 주소, 인증서, 로그인, 걸러 내기를 맡고, B안은 그 넷이 사용자와 FBQ에게 넘어온다.</p>
+  </section>
+
+  <section>
+    <h2>확인하지 않은 것과 받아들이는 위험</h2>
+    <ul class="notes">
+      <li>FBQ를 <code>127.0.0.1</code>에만 열고 Google OIDC를 쓰는 설정 이름은 에이전트의 지식이다. 설치하면서 확인한다.</li>
+      <li>A안에서 같은 PC의 다른 프로그램은 <code>127.0.0.1</code>로 FBQ에 접속해 이메일 헤더를 꾸며 보낼 수 있다. FBQ는 헤더를 그대로 믿기 때문이다. 사용자 혼자 쓰는 PC라 받아들이는 위험으로 본다.</li>
+      <li>Tunnel 공개 호스트명에 100MB가 걸린다는 것은 Cloudflare의 두 문장을 이어서 추정한 것이다.</li>
+    </ul>
+  </section>
+</div>
+
+</html>

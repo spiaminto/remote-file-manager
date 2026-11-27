@@ -68,9 +68,9 @@ Angular 커밋 컨벤션(angular/angular `contributing-docs/commit-message-guide
 # 프로젝트: 파일매니저(웹)
 
 > 작성일: 26-11-27\
-> 최종 수정일: 26-11-27
+> 최종 수정일: 26-11-28
 
-상시 켜 둔 집 PC(Windows 11)를 홈서버로 삼아, 밖에서 브라우저로 로그인해 정해 둔 경로(`C:\_workspace` 이하를 상정)를 탐색하고 파일을 올리고 내려받는 개인용 웹앱이다. 사용자 한 명만 쓴다. 외부 접속은 Cloudflare Tunnel과 Access(Google 로그인)로 하기로 했다. 앱의 구성(직접 구현할지, 기존 제품을 쓸지, 언어)은 아직 정하지 않았다. 사전 기획과 리서치는 `docs/discussions/26-11-27-pre-planning.md`에 있다.
+상시 켜 둔 집 PC(Windows 11)를 홈서버로 삼아, 밖에서 브라우저로 로그인해 정해 둔 경로(`C:\_workspace` 이하를 상정)를 탐색하고 파일을 올리고 내려받는 개인용 웹앱이다. 사용자 한 명만 쓴다. 외부 접속은 Cloudflare Tunnel과 Access(Google 로그인)로 한다. 앱은 직접 구현하지 않고 FileBrowser Quantum을 설치해 설정으로 맞추며, 써 보고 불편하면 직접 구현을 다시 검토한다. 사전 기획, 리서치, 요구사항 인터뷰는 `docs/discussions/26-11-27-requirements.md`에 있다.
 
 ## 경계
 
@@ -80,7 +80,7 @@ Angular 커밋 컨벤션(angular/angular `contributing-docs/commit-message-guide
 
 ## 맥락 복원
 
-- 계획 문서: `docs/discussions/` 아래 가장 최근의 인터뷰 문서. 사전 기획은 `26-11-27-pre-planning.md`다.
+- 계획 문서: `docs/discussions/` 아래 가장 최근의 인터뷰 문서. 지금은 `26-11-27-requirements.md`이고, 그 문서의 "요구사항" 절이 요구사항이다.
 - 코드 규칙: `docs/CONVENTIONS.md`
 - 작업 상태: `.claude/STATE.md`
 - 단계 경계: 커밋 직후.
