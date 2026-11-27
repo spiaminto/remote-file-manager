@@ -3,7 +3,7 @@
 > 작성일: 26-11-28\
 > 최종 수정일: 26-11-28
 
-파일매니저(웹)로 쓰는 FileBrowser Quantum(FBQ)을 홈서버에 어떻게 설치했고, 시험할 때 어떻게 켜고 끄며, 무엇을 어떻게 확인했는지 적는다. 요구사항은 [26-11-27-requirements.md](discussions/26-11-27-requirements.md)의 "요구사항" 절이다.
+파일매니저(웹)로 쓰는 FileBrowser Quantum(FBQ)을 홈서버에 어떻게 설치했고, 시험할 때 어떻게 켜고 끄며, 무엇을 어떻게 확인했는지 적는다. 요구사항은 [discussion.md](works/26-11-27-file-manager/discussion.md)의 "요구사항" 절이다.
 
 ## 현재 상태
 
